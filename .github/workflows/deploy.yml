@@ -34,7 +34,7 @@ jobs:
         run: |
           cd backend
           uv pip install ruff
-          ruff .
+          uv run ruff check .
 
   test:
     name: Run Tests
