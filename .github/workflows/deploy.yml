@@ -28,7 +28,7 @@ jobs:
         run: |
           cd backend
           uv venv
-          uv pip install -e .
+          uv sync --active
 
       - name: Run Ruff
         run: |
