@@ -1,0 +1,37 @@
+lint.fixable = ["ALL"]
+lint.select = [
+    "A",  # prevent using keywords that clobber python builtins
+    "B",  # bugbear: security warnings
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "ISC",  # implicit string concatenation
+    "UP",  # alert you when better syntax is available in your python version
+]
+line-length = 120
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
+    "config",
+    "utils",
+]
