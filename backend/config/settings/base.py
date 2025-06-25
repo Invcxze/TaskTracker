@@ -37,9 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     "django_elasticsearch_dsl",
     'apps.users.apps.UsersConfig',
     'apps.workspaces.apps.WorkspacesConfig',
+    'apps.tasks.apps.TasksConfig',
 ]
 
 MIDDLEWARE = [
