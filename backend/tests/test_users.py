@@ -52,16 +52,16 @@ def test_log_in_invalid_password(api_client, create_user, user_data):
 
 
 @pytest.mark.django_db
+def test_log_out_authorized(api_client, create_user, user_data):
+    user = create_user()
+    token = user.auth_token.key
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+    response = api_client.post("/api/auth/log-out/")
+    assert response.status_code == 204
+
+
+@pytest.mark.django_db
 def test_log_out_unauthorized(api_client):
     response = api_client.post("/api/auth/log-out/")
     assert response.status_code == 403
     assert response.data["error"]["code"] == 403
-
-
-@pytest.mark.django_db
-def test_log_out_authorized(api_client, create_user, user_data):
-    user = create_user()
-    token = user.auth_token.key
-    api_client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
-    response = api_client.post("/api/auth/log-out/")
-    assert response.status_code == 204
