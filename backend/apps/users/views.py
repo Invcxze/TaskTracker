@@ -1,6 +1,6 @@
-from django.db import models
 from elasticsearch.dsl import Q
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser
 from rest_framework.request import Request
@@ -8,11 +8,12 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import User
-from .permissions import permission_required
 from .search_document import UserDocument
+from .serializers.manage import UserPermissionUpdateSerializer, UserSerializer
 from .serializers.search import UserListSerializer
 from .serializers.user import LogSerializer, RegSerializer
 from .utils.auth import generate_token_response
+from ..workspaces.models import UserWorkspaceRole
 
 
 @api_view(["POST"])
@@ -72,10 +73,39 @@ def user_search_view(request):
 
     search_query = UserDocument.search().query(q)
 
-    # Пагинация
     paginator = PageNumberPagination()
     paginator.page_size = 10
     page = paginator.paginate_queryset(search_query.execute().hits, request)
 
     serializer = UserListSerializer(page, many=True)
     return paginator.get_paginated_response(serializer.data)
+
+
+@api_view(["PATCH"])
+@permission_classes([IsAdminUser])
+def update_user_permissions(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    serializer = UserPermissionUpdateSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.validated_data
+
+    if "is_staff" in data:
+        user.is_staff = data["is_staff"]
+    if "is_superuser" in data:
+        user.is_superuser = data["is_superuser"]
+    user.save()
+
+    if "role_ids" in data:
+        workspace_id = data.get("workspace_id")
+        if not workspace_id:
+            return Response(
+                {"detail": "workspace_id обязателен при назначении ролей."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.workspace_roles.filter(workspace_id=workspace_id).delete()
+
+        for role_id in data["role_ids"]:
+            UserWorkspaceRole.objects.create(user=user, workspace_id=workspace_id, role_id=role_id)
+
+    return Response(UserSerializer(user).data, status=status.HTTP_200_OK)

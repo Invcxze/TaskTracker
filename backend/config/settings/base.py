@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     "django_elasticsearch_dsl",
-    "celery",
     'apps.users.apps.UsersConfig',
     'apps.workspaces.apps.WorkspacesConfig',
 ]
@@ -140,4 +139,3 @@ ELASTICSEARCH_DSL = {
         "hosts": env("ELASTIC_HOST", default="http://localhost:9200"),
     },
 }
-ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = "django_elasticsearch_dsl.signals.CelerySignalProcessor"
