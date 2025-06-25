@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
 
-class WorkspacesConfig(AppConfig):
+class UsersConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'workspaces'
+    name = 'apps.users'
+    label = 'users'
