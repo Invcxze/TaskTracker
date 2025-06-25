@@ -13,6 +13,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.config.settings.local")
 import django
 django.setup()
 
+
 @pytest.fixture
 def admin_user(create_user):
     return create_user(is_staff=True, is_superuser=True)
