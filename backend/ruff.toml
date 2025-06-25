@@ -34,4 +34,5 @@ exclude = [
     "migrations",
     "config",
     "utils",
+    "__init__",
 ]
