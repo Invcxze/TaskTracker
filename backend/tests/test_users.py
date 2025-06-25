@@ -3,10 +3,9 @@ import uuid
 import pytest
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
-from apps.users.models import User
+from apps.users.models import User, Role
 
-from backend.apps.users.models import Role
-from backend.apps.workspaces.models import UserWorkspaceRole
+from apps.workspaces.models import UserWorkspaceRole
 
 
 @pytest.fixture
