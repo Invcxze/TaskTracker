@@ -1,25 +1,36 @@
-from rest_framework import generics, permissions
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view
+from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN
 
-from .models import User
-from .serializers.user import RegisterSerializer
-
-
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def perform_create(self, serializer):
-        user = serializer.save()
-        Token.objects.create(user=user)
+from .serializers.user import LogSerializer, RegSerializer
 
 
-class CustomAuthToken(ObtainAuthToken):
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        token = Token.objects.get(key=response.data["token"])
-        user = token.user
-        return Response({"token": token.key, "user_id": user.pk, "email": user.email})
+@api_view(["POST"])
+def log_in_handler(request: Request) -> Response:
+    serializer = LogSerializer(data=request.data, context={"request": request})
+    serializer.is_valid(raise_exception=True)
+    user = serializer.validated_data["user"]
+
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({"data": {"user_token": token.key}}, status=HTTP_200_OK)
+
+
+@api_view(["POST"])
+def sign_up_handler(request: Request) -> Response:
+    serializer = RegSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
+
+    token = Token.objects.create(user=user)
+    return Response({"data": {"user_token": token.key}}, status=HTTP_201_CREATED)
+
+
+@api_view(["POST"])
+def log_out_handler(request: Request) -> Response:
+    if not request.user.is_authenticated:
+        return Response({"error": {"code": 403, "message": "Пользователь не авторизован"}}, status=HTTP_403_FORBIDDEN)
+
+    request.user.auth_token.delete()
+    return Response(status=HTTP_204_NO_CONTENT)
