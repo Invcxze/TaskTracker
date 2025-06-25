@@ -1,18 +1,9 @@
-import uuid
-
 import pytest
+from apps.users.models import User, Role
+from apps.workspaces.models import UserWorkspaceRole
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
-from apps.users.models import User, Role
-
-from apps.workspaces.models import UserWorkspaceRole
-
-import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.config.settings.local")
-
-import django
-django.setup()
-
+import uuid
 
 @pytest.fixture
 def admin_user(create_user):
