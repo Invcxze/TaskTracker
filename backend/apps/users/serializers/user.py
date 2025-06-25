@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
 from ..models import User
 
@@ -37,4 +38,5 @@ class RegSerializer(serializers.ModelSerializer):
         user.fio = self.validated_data["fio"]
         user.set_password(self.validated_data["password"])
         user.save()
+        Token.objects.create(user=user)
         return user

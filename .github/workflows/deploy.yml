@@ -57,7 +57,7 @@ jobs:
       - name: Run Pytest
         run: |
           cd backend
-          uv run manage.py test
+          uv run --active pytest
 
   deploy:
     name: Deploy to production

@@ -1,6 +1,6 @@
 from rest_framework.authtoken.models import Token
 
-from backend.apps.users.models import User
+from apps.users.models import User
 
 
 def generate_token_response(user: User) -> dict[str, dict[str, str]]:
