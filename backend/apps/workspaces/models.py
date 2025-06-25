@@ -1,8 +1,6 @@
 from django.db import models
 
-from apps.users.models import User
-from apps.users.models.permissions import Role
-
+from apps.users.models import User, Role
 
 class Workspace(models.Model):
     name = models.CharField(max_length=255)
