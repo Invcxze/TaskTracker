@@ -58,7 +58,7 @@ def test_sign_up_success(api_client, user_data):
 
 @pytest.mark.django_db
 def test_log_in_success(api_client, create_user, user_data):
-    user = create_user(email=user_data["email"])
+    create_user(email=user_data["email"])
     payload = {"email": user_data["email"], "password": user_data["password"]}
     response = api_client.post("/api/auth/log-in/", data=payload, format="json")
     assert response.status_code == 200

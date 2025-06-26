@@ -54,6 +54,6 @@ class UserDocument(Document):
         return [{"id": wid, "name": wname} for wid, wname in qs if wid and wname]
 
     def get_instances_from_related(self, related_instance):
-        if isinstance(related_instance, (Role, Permission, RolePermission, Workspace)):
+        if isinstance(related_instance, Role|Permission|RolePermission|Workspace):
             return User.objects.filter(workspace_roles__role=related_instance).distinct()
         return []
