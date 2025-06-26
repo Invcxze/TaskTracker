@@ -12,6 +12,6 @@ RUN pip install uv && \
 
 COPY backend .
 
-ENV DJANGO_SETTINGS_MODULE=config.settings.settings
+ENV DJANGO_SETTINGS_MODULE=config.settings.base
 
 CMD ["uv", "run", "manage.py", "runserver", "0.0.0.0:8000"]
