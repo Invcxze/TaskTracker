@@ -106,6 +106,10 @@ def update_user_permissions(request, pk):
         user.workspace_roles.filter(workspace_id=workspace_id).delete()
 
         for role_id in data["role_ids"]:
-            UserWorkspaceRole.objects.create(user=user, workspace_id=workspace_id, role_id=role_id)
+            UserWorkspaceRole.objects.create(
+                user=user,
+                workspace_id=workspace_id,
+                role_id=role_id
+            )
 
     return Response(UserSerializer(user).data, status=status.HTTP_200_OK)

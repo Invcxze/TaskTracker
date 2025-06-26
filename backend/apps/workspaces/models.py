@@ -33,7 +33,7 @@ class UserWorkspaceRole(models.Model):
     )
 
     class Meta:
-        unique_together = ("user", "workspace")
+        unique_together = ("user", "workspace", "role")
         ordering = ["workspace", "user"]
 
     def __str__(self):

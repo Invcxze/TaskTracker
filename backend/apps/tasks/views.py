@@ -7,12 +7,21 @@ from .models import (
     TaskDependency, TaskComment, TaskAttachment,
     TaskChecklistItem, TaskLog
 )
-from .serializers import (
-    TaskTypeSerializer, TaskStatusSerializer, LabelSerializer,
-    TaskSerializer, TaskDependencySerializer, TaskCommentSerializer,
-    TaskAttachmentSerializer, TaskChecklistItemSerializer, TaskLogSerializer
-)
+
 from apps.workspaces.models import Workspace
+
+from .serializers.tasks import (
+    TaskTypeSerializer,
+    TaskStatusSerializer,
+    LabelSerializer,
+    TaskSerializer,
+    TaskDependencySerializer,
+    TaskCommentSerializer,
+    TaskAttachmentSerializer,
+    TaskChecklistItemSerializer,
+    TaskLogSerializer,
+)
+
 
 class TaskTypeViewSet(viewsets.ModelViewSet):
     queryset = TaskType.objects.all()
@@ -39,7 +48,6 @@ class LabelViewSet(viewsets.ModelViewSet):
     filterset_fields = ['workspace']
 
     def get_queryset(self):
-        # Фильтрация по workspace пользователя
         user_workspaces = Workspace.objects.filter(
             user_roles__user=self.request.user
         )
@@ -55,7 +63,6 @@ class TaskViewSet(viewsets.ModelViewSet):
     ]
 
     def get_queryset(self):
-        # Задачи в workspace, где пользователь имеет роль
         return Task.objects.filter(
             workspace__user_roles__user=self.request.user
         ).distinct()
