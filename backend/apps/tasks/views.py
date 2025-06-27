@@ -13,6 +13,7 @@ from .models import (
     TaskChecklistItem,
     TaskLog,
 )
+from .selectors.search import task_search
 from .selectors.users import (
     filter_by_user_workspaces,
     filter_by_user_workspace_and_related_field,

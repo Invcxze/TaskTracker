@@ -46,5 +46,5 @@ def task_search(queryset, search_query, filters):
 
     task_ids = [hit.id for hit in response]
 
-    preserved_order = Case(*[When(id=id, then=pos) for pos, id in enumerate(task_ids)])
+    preserved_order = Case(*[When(id=id, then=pos) for pos, id in enumerate(task_ids)])  # noqa: A001
     return queryset.filter(id__in=task_ids).order_by(preserved_order)
