@@ -211,7 +211,7 @@ def test_task_search_basic(auth_client):
     task1 = Task.objects.create(
         title="Important task", description="This is a very important task", workspace=workspace, creator=admin
     )
-    task2 = Task.objects.create(
+    Task.objects.create(
         title="Regular task", description="Just a regular task", workspace=workspace, creator=admin
     )
 
@@ -259,7 +259,7 @@ def test_task_search_with_filters(auth_client):
     )
     task1.labels.add(label_urgent)
 
-    task2 = Task.objects.create(
+    Task.objects.create(
         title="Task 2",
         workspace=workspace2,
         status=status_closed,
@@ -337,9 +337,9 @@ def test_task_search_priority_filter(auth_client):
     role = Role.objects.create(name="Member")
     UserWorkspaceRole.objects.create(user=admin, workspace=workspace, role=role)
 
-    task_high = Task.objects.create(title="High Priority", priority="high", workspace=workspace, creator=admin)
-    task_medium = Task.objects.create(title="Medium Priority", priority="medium", workspace=workspace, creator=admin)
-    task_low = Task.objects.create(title="Low Priority", priority="low", workspace=workspace, creator=admin)
+    Task.objects.create(title="High Priority", priority="high", workspace=workspace, creator=admin)
+    Task.objects.create(title="Medium Priority", priority="medium", workspace=workspace, creator=admin)
+    Task.objects.create(title="Low Priority", priority="low", workspace=workspace, creator=admin)
 
     with patch("apps.tasks.views.task_search", return_value=Task.objects.filter(priority__in=["high", "medium"])):
         url = reverse("tasks-search")
@@ -360,10 +360,10 @@ def test_task_search_due_date_filter(auth_client):
     UserWorkspaceRole.objects.create(user=admin, workspace=workspace, role=role)
 
     today = timezone.now().date()
-    task_past = Task.objects.create(
+    Task.objects.create(
         title="Past Due", due_date=today - timedelta(days=5), workspace=workspace, creator=admin
     )
-    task_future = Task.objects.create(
+    Task.objects.create(
         title="Future Due", due_date=today + timedelta(days=5), workspace=workspace, creator=admin
     )
     task_range = Task.objects.create(
