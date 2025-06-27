@@ -14,8 +14,11 @@ from .models import (
     TaskChecklistItem,
     TaskLog,
 )
-
-
+from .selectors.users import (
+    filter_by_user_workspaces,
+    filter_by_user_workspace_and_related_field,
+    user_has_access_to_workspace,
+)
 from .serializers.tasks import (
     TaskTypeSerializer,
     TaskStatusSerializer,
@@ -27,7 +30,6 @@ from .serializers.tasks import (
     TaskChecklistItemSerializer,
     TaskLogSerializer,
 )
-from ..workspaces.models import Workspace, UserWorkspaceRole
 
 
 class TaskTypeViewSet(viewsets.ModelViewSet):
@@ -43,12 +45,11 @@ class TaskStatusViewSet(viewsets.ModelViewSet):
     filterset_fields = ["workspace"]
 
     def get_queryset(self):
-        user_workspaces = Workspace.objects.filter(user_roles__user=self.request.user)
-        return TaskStatus.objects.filter(workspace__in=user_workspaces)
+        return filter_by_user_workspaces(TaskStatus, self.request.user)
 
     def perform_create(self, serializer):
         workspace = serializer.validated_data.get("workspace")
-        if not workspace or not UserWorkspaceRole.objects.filter(workspace=workspace, user=self.request.user).exists():
+        if not user_has_access_to_workspace(self.request.user, workspace):
             raise PermissionDenied("You do not have access to this workspace.")
         serializer.save()
 
@@ -60,12 +61,11 @@ class LabelViewSet(viewsets.ModelViewSet):
     filterset_fields = ["workspace"]
 
     def get_queryset(self):
-        user_workspaces = Workspace.objects.filter(user_roles__user=self.request.user)
-        return Label.objects.filter(workspace__in=user_workspaces)
+        return filter_by_user_workspaces(Label, self.request.user)
 
     def perform_create(self, serializer):
         workspace = serializer.validated_data.get("workspace")
-        if not workspace or not Workspace.objects.filter(id=workspace.id, user_roles__user=self.request.user).exists():
+        if not user_has_access_to_workspace(self.request.user, workspace):
             raise PermissionDenied("You do not have access to this workspace.")
         serializer.save()
 
@@ -77,20 +77,18 @@ class TaskViewSet(viewsets.ModelViewSet):
     filterset_fields = ["workspace", "status", "task_type", "assignee", "creator", "priority"]
 
     def get_queryset(self):
-        return Task.objects.filter(workspace__user_roles__user=self.request.user).distinct()
+        return filter_by_user_workspaces(Task, self.request.user)
 
     @action(detail=True, methods=["post"])
     def add_watcher(self, request, pk=None):
         task = self.get_object()
-        user = request.user
-        task.watchers.add(user)
+        task.watchers.add(request.user)
         return Response({"status": "watcher added"})
 
     @action(detail=True, methods=["post"])
     def remove_watcher(self, request, pk=None):
         task = self.get_object()
-        user = request.user
-        task.watchers.remove(user)
+        task.watchers.remove(request.user)
         return Response({"status": "watcher removed"})
 
 
@@ -99,7 +97,7 @@ class TaskDependencyViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user_tasks = Task.objects.filter(workspace__user_roles__user=self.request.user)
+        user_tasks = filter_by_user_workspaces(Task, self.request.user)
         return TaskDependency.objects.filter(from_task__in=user_tasks, to_task__in=user_tasks)
 
 
@@ -108,7 +106,7 @@ class TaskCommentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        qs = TaskComment.objects.filter(task__workspace__user_roles__user=self.request.user)
+        qs = filter_by_user_workspace_and_related_field(TaskComment, self.request.user, "task__workspace")
         task_id = self.kwargs.get("task_pk")
         if task_id:
             qs = qs.filter(task_id=task_id)
@@ -123,7 +121,7 @@ class TaskAttachmentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        qs = TaskAttachment.objects.filter(task__workspace__user_roles__user=self.request.user)
+        qs = filter_by_user_workspace_and_related_field(TaskAttachment, self.request.user, "task__workspace")
         task_id = self.kwargs.get("task_pk")
         if task_id:
             qs = qs.filter(task_id=task_id)
@@ -138,7 +136,7 @@ class TaskChecklistItemViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        qs = TaskChecklistItem.objects.filter(task__workspace__user_roles__user=self.request.user)
+        qs = filter_by_user_workspace_and_related_field(TaskChecklistItem, self.request.user, "task__workspace")
         task_id = self.kwargs.get("task_pk")
         if task_id:
             qs = qs.filter(task_id=task_id)
@@ -152,7 +150,7 @@ class TaskLogViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ["task", "user", "action"]
 
     def get_queryset(self):
-        qs = TaskLog.objects.filter(task__workspace__user_roles__user=self.request.user)
+        qs = filter_by_user_workspace_and_related_field(TaskLog, self.request.user, "task__workspace")
         task_id = self.kwargs.get("task_pk")
         if task_id:
             qs = qs.filter(task_id=task_id)
