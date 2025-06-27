@@ -21,7 +21,8 @@ from django_elasticsearch_dsl.signals import BaseSignalProcessor
 
 from apps.users.models import User
 from apps.tasks.models import Task, Label, TaskStatus, TaskType
-from apps.workspaces.models import Workspace
+from apps.workspaces.models import Workspace, UserWorkspaceRole
+
 
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):

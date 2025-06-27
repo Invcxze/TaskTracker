@@ -67,11 +67,9 @@ class Task(models.Model):
     assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="assigned_tasks")
     parent_task = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="subtasks")
 
-    # Многие ко многим
     labels = models.ManyToManyField(Label, blank=True, related_name="tasks")
     watchers = models.ManyToManyField(User, blank=True, related_name="watched_tasks")
 
-    # Для истории изменений
     history = GenericRelation("TaskLog")
 
     def __str__(self):
