@@ -315,6 +315,7 @@ def test_task_search_pagination(auth_client):
         response1 = client.get(url, {"page": 1})
         assert response1.status_code == status.HTTP_200_OK
 
+
 @pytest.mark.django_db
 def test_task_search_unauthorized(api_client):
     user = User.objects.create(email="regular@example.com")
