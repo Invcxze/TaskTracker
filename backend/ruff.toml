@@ -35,4 +35,5 @@ exclude = [
     "config",
     "utils",
     "__init__.py",
+    "conftest.py",
 ]

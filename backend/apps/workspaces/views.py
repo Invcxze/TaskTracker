@@ -12,15 +12,14 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+
 class UserWorkspaceRoleViewSet(viewsets.ModelViewSet):
     serializer_class = UserWorkspaceRoleSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return UserWorkspaceRole.objects.filter(
-            workspace_id=self.kwargs.get('workspace_pk')
-        )
+        return UserWorkspaceRole.objects.filter(workspace_id=self.kwargs.get("workspace_pk"))
 
     def perform_create(self, serializer):
-        workspace = Workspace.objects.get(pk=self.kwargs['workspace_pk'])
+        workspace = Workspace.objects.get(pk=self.kwargs["workspace_pk"])
         serializer.save(workspace=workspace)

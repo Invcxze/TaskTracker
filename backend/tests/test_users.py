@@ -1,52 +1,8 @@
 import pytest
-from apps.users.models import User, Role
+from apps.users.models import Role
 from apps.workspaces.models import UserWorkspaceRole, Workspace
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-import uuid
 from django.db.models import signals
 
-@pytest.fixture
-def admin_user(create_user):
-    return create_user(is_staff=True, is_superuser=True)
-
-@pytest.fixture
-def auth_client(api_client):
-    admin = User.objects.create_superuser(
-        fio="Admin User",
-        email=f"admin_{uuid.uuid4().hex[:6]}@example.com",
-        password="adminpass",
-        is_staff=True,
-        is_superuser=True
-    )
-    token = Token.objects.create(user=admin)
-    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {token.key}")
-    return api_client, admin
-
-@pytest.fixture
-def api_client():
-    return APIClient()
-
-
-@pytest.fixture
-def user_data():
-    unique_id = uuid.uuid4().hex[:6]
-    return {
-        "email": f"test_{unique_id}@example.com",
-        "fio": "Test User",
-        "password": "TestPass123"
-    }
-
-
-@pytest.fixture
-def create_user():
-    def make_user(email=None, fio='Test User', password='TestPass123', **kwargs):
-        if email is None:
-            email = f"test_{uuid.uuid4().hex[:6]}@example.com"
-        user = User.objects.create_user(fio=fio, email=email, password=password, **kwargs)
-        Token.objects.create(user=user)
-        return user
-    return make_user
 
 @pytest.mark.django_db
 def test_sign_up_success(api_client, user_data):
@@ -139,9 +95,7 @@ def test_update_permissions_missing_workspace_id(auth_client, create_user):
 
     role = Role.objects.create(name="Manager")
 
-    payload = {
-        "role_ids": [role.id]
-    }
+    payload = {"role_ids": [role.id]}
 
     url = f"/api/auth/users/{user.pk}/update-permissions/"
     response = client.patch(url, data=payload, format="json")

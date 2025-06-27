@@ -9,7 +9,8 @@ from rest_framework import status
 
 from .models import User
 from .search_document import UserDocument
-from .serializers.manage import UserPermissionUpdateSerializer, UserSerializer
+from .serializers.manage import UserSerializer, UserPermissionUpdateSerializer
+
 from .serializers.search import UserListSerializer
 from .serializers.user import LogSerializer, RegSerializer
 from .utils.auth import generate_token_response
@@ -99,17 +100,12 @@ def update_user_permissions(request, pk):
         workspace_id = data.get("workspace_id")
         if not workspace_id:
             return Response(
-                {"detail": "workspace_id обязателен при назначении ролей."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "workspace_id обязателен при назначении ролей."}, status=status.HTTP_400_BAD_REQUEST
             )
 
         user.workspace_roles.filter(workspace_id=workspace_id).delete()
 
         for role_id in data["role_ids"]:
-            UserWorkspaceRole.objects.create(
-                user=user,
-                workspace_id=workspace_id,
-                role_id=role_id
-            )
+            UserWorkspaceRole.objects.create(user=user, workspace_id=workspace_id, role_id=role_id)
 
     return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
