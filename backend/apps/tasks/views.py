@@ -1,5 +1,4 @@
 from rest_framework import viewsets, permissions
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
@@ -17,7 +16,6 @@ from .models import (
 from .selectors.users import (
     filter_by_user_workspaces,
     filter_by_user_workspace_and_related_field,
-    user_has_access_to_workspace,
 )
 from .serializers.tasks import (
     TaskTypeSerializer,
