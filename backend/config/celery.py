@@ -2,7 +2,7 @@ import os
 
 from celery import Celery
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", f"config.settings.local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", f"config.settings.base")
 
 app = Celery('core')
 app.conf.timezone = "Europe/Moscow"

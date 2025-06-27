@@ -78,12 +78,19 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB'),
+            'USER': os.getenv('POSTGRES_USER'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+            'HOST': os.getenv('POSTGRES_HOST', 'postgres'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        }
     }
-}
 
 
 # Password validation
@@ -141,3 +148,11 @@ ELASTICSEARCH_DSL = {
         "hosts": env("ELASTIC_HOST", default="http://localhost:9200"),
     },
 }
+
+# CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://:1337@localhost:6379/0')
+# CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://:1337@localhost:6379/0')
+# CELERY_ACCEPT_CONTENT = ['pickle']
+# CELERY_TASK_SERIALIZER = 'pickle'
+# CELERY_RESULT_SERIALIZER = 'pickle'
+#
+# ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = "django_elasticsearch_dsl.signals.CelerySignalProcessor"

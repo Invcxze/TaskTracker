@@ -4,12 +4,16 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
+    "celery>=5.5.3",
     "django>=5.2.3",
+    "django-celery-beat>=2.8.1",
     "django-elasticsearch-dsl>=8.2",
     "django-filter>=25.1",
     "djangorestframework>=3.16.0",
     "drf-nested-routers>=0.94.2",
     "envparse>=0.2.0",
+    "psycopg2-binary>=2.9.10",
     "pytest>=8.4.1",
     "pytest-django>=4.11.1",
+    "redis>=6.2.0",
 ]
