@@ -223,7 +223,8 @@ class TaskAdmin(admin.ModelAdmin):
         colors = {"low": "#3498db", "medium": "#2ecc71", "high": "#f39c12", "critical": "#e74c3c"}
         color = colors.get(obj.priority, "#000")
         return format_html(
-            '<div style="display: inline-block; padding: 2px 8px; background-color: {}; color: white; border-radius: 4px;">{}</div>',
+            '<div style="display: inline-block; padding: 2px 8px; background-color: {}; color: white;'
+            ' border-radius: 4px;">{}</div>',
             color,
             priorities.get(obj.priority, obj.priority),
         )
