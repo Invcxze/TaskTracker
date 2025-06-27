@@ -1,8 +1,10 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 from django.db.models import signals
 from rest_framework import status
 
-from apps.users.models import Role
+from apps.users.models import Role, User
 from apps.workspaces.models import UserWorkspaceRole, Workspace
 
 
@@ -118,4 +120,93 @@ def test_update_permissions_denied_for_non_admin(api_client, create_user):
     url = f"/api/auth/users/{target_user.pk}/update-permissions/"
     response = api_client.patch(url, data=payload, format="json")
 
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_user_search_basic(auth_client):
+    client, admin = auth_client
+
+    user1 = User.objects.create(email="user1@example.com", fio="John Doe", is_active=True)
+    user2 = User.objects.create(email="user2@example.com", fio="Jane Smith", is_active=False)
+
+    mock_search = MagicMock()
+    mock_execute = MagicMock()
+    mock_execute.hits = [user1, user2]
+    mock_search.execute.return_value = mock_execute
+
+    with patch("apps.users.views.search_users", return_value=mock_search) as mock_search_func:
+        response = client.get("/api/auth/users/search/", {"search": "john"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data["results"]) == 2
+    mock_search_func.assert_called_once_with(
+        search="john", is_active=None, is_staff=None, is_superuser=None, permission_code=None
+    )
+
+
+@pytest.mark.django_db
+def test_user_search_with_filters(auth_client):
+    client, admin = auth_client
+
+    mock_search = MagicMock()
+    mock_execute = MagicMock()
+    mock_execute.hits = [admin]
+    mock_search.execute.return_value = mock_execute
+
+    with patch("apps.users.views.search_users", return_value=mock_search):
+        response = client.get(
+            "/api/auth/users/search/",
+            {"is_active": "true", "is_staff": "true", "is_superuser": "true", "permission": "manage_users"},
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data["results"]) == 1
+
+
+@pytest.mark.django_db
+def test_user_search_pagination(auth_client):
+    client, admin = auth_client
+
+    for i in range(15):
+        User.objects.create(email=f"user{i}@example.com", fio=f"User {i}")
+
+    mock_search = MagicMock()
+    mock_execute = MagicMock()
+    mock_execute.hits = User.objects.all()
+    mock_search.execute.return_value = mock_execute
+
+    with patch("apps.users.views.search_users", return_value=mock_search):
+        response1 = client.get("/api/auth/users/search/", {"page": 1})
+        assert response1.status_code == status.HTTP_200_OK
+        assert len(response1.data["results"]) == 10
+        assert response1.data["count"] == 16
+
+        response2 = client.get("/api/auth/users/search/", {"page": 2})
+        assert response2.status_code == status.HTTP_200_OK
+        assert len(response2.data["results"]) == 6
+
+
+@pytest.mark.django_db
+def test_user_search_permission_filter(auth_client):
+    client, admin = auth_client
+
+    mock_search = MagicMock()
+    mock_execute = MagicMock()
+    mock_execute.hits = [admin]
+    mock_search.execute.return_value = mock_execute
+
+    with patch("apps.users.views.search_users", return_value=mock_search):
+        response = client.get("/api/auth/users/search/", {"permission": "admin_panel"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data["results"]) == 1
+
+
+@pytest.mark.django_db
+def test_user_search_unauthorized(api_client):
+    user = User.objects.create(email="regular@example.com", is_active=True)
+    api_client.force_authenticate(user)
+
+    response = api_client.get("/api/auth/users/search/")
     assert response.status_code == status.HTTP_403_FORBIDDEN
