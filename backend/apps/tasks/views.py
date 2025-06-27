@@ -30,6 +30,8 @@ from .serializers.tasks import (
     TaskChecklistItemSerializer,
     TaskLogSerializer,
 )
+from .services.label import LabelService
+from .services.task_status import TaskStatusService
 
 
 class TaskTypeViewSet(viewsets.ModelViewSet):
@@ -48,10 +50,7 @@ class TaskStatusViewSet(viewsets.ModelViewSet):
         return filter_by_user_workspaces(TaskStatus, self.request.user)
 
     def perform_create(self, serializer):
-        workspace = serializer.validated_data.get("workspace")
-        if not user_has_access_to_workspace(self.request.user, workspace):
-            raise PermissionDenied("You do not have access to this workspace.")
-        serializer.save()
+        TaskStatusService.create(serializer.validated_data, self.request.user)
 
 
 class LabelViewSet(viewsets.ModelViewSet):
@@ -64,10 +63,10 @@ class LabelViewSet(viewsets.ModelViewSet):
         return filter_by_user_workspaces(Label, self.request.user)
 
     def perform_create(self, serializer):
-        workspace = serializer.validated_data.get("workspace")
-        if not user_has_access_to_workspace(self.request.user, workspace):
-            raise PermissionDenied("You do not have access to this workspace.")
-        serializer.save()
+        LabelService.create(serializer.validated_data, self.request.user)
+
+    def perform_update(self, serializer):
+        LabelService.update(self.get_object(), serializer.validated_data, self.request.user)
 
 
 class TaskViewSet(viewsets.ModelViewSet):
