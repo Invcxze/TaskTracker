@@ -88,6 +88,33 @@ class TaskViewSet(viewsets.ModelViewSet):
         task.watchers.remove(request.user)
         return Response({"status": "watcher removed"})
 
+    @action(detail=False, methods=["get"])
+    def search(self, request):
+        base_queryset = self.get_queryset()
+
+        search_query = request.GET.get("q", "")
+        filters = {
+            "workspace": request.GET.get("workspace"),
+            "status": request.GET.get("status"),
+            "priority": request.GET.getlist("priority"),
+            "assignee": request.GET.get("assignee"),
+            "creator": request.GET.get("creator"),
+            "is_closed": request.GET.get("is_closed"),
+            "labels": request.GET.getlist("labels"),
+            "due_date_before": request.GET.get("due_date_before"),
+            "due_date_after": request.GET.get("due_date_after"),
+        }
+
+        result_queryset = task_search(base_queryset, search_query, filters)
+
+        page = self.paginate_queryset(result_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(result_queryset, many=True)
+        return Response(serializer.data)
+
 
 class TaskDependencyViewSet(viewsets.ModelViewSet):
     serializer_class = TaskDependencySerializer
